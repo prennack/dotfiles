@@ -1,10 +1,17 @@
 "" Plugins -> has to be on top
 set nocompatible              " be iMproved, required
 filetype off                  " required
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
 
+" set important paths
+set undodir=$XDG_DATA_HOME/vim/undo
+set directory=$XDG_DATA_HOME/vim/swap
+set backupdir=$XDG_DATA_HOME/vim/backup
+set viewdir=$XDG_DATA_HOME/vim/view
+set viminfo+='1000,n$XDG_DATA_HOME/vim/viminfo
+set runtimepath=$XDG_CONFIG_HOME/vim,$VIMRUNTIME,$XDG_CONFIG_HOME/vim/after
+
+set runtimepath+=$XDG_CACHE_HOME/vim/bundle/Vundle.vim
+call vundle#begin("$XDG_CACHE_HOME/vim/bundle")
 
 " Required for working Vundle
 Plugin 'VundleVim/Vundle.vim'
@@ -16,10 +23,8 @@ Plugin 'vim-airline/vim-airline-themes'
 Plugin 'majutsushi/tagbar'
 " Fuzzy finder 
 Plugin 'junegunn/fzf'
-" solarized colors
-Plugin 'altercation/vim-colors-solarized'
-
-
+" colorscheme: nord
+Plugin 'arcticicestudio/nord-vim'
 
 call vundle#end()            " required
 filetype plugin indent on    " required
@@ -27,28 +32,19 @@ filetype plugin indent on    " required
 " Airline Settings
 " Tabbar (top of vim) is enabled
 let g:airline#extensions#tabline#enabled = 1
-" Use solarized as a theme
-let g:airline_theme='solarized'
-" Toggle between dark and light theme for Statusbar
-let g:airline_solarized_bg='light'
 " Use Powerline Fonts (better looking)
 let g:airline_powerline_fonts = 1
-
-
 
 """"""""""""""""""""
 """ Own settings """
 """"""""""""""""""""
 
-
 "" General
 " Other
-set nocompatible                " Using more than just vi features
 set wildmenu                    " Opens a menue when there is more than one file/command/...
 set wildmode=list:longest,full  " Shows all possible files/commands/... in a list
 set t_Co=256                    " Colors to 256, for TODO
-colorscheme solarized           " Use solarized as color scheme !Download theme to ~/.vim/colors/solarized.vim
-set background=light            " Use light mode of colorscheme
+colorscheme nord 
 set clipboard=unnamedplus       " Nutze den STRG+C/STRG+V - copy-paste-buffer
 
 " Display
@@ -81,10 +77,10 @@ set wildignorecase              " case insensitive searching -> TAB completion
 " Indentation
 set autoindent      " Auto-indent new lines
 set expandtab       " Use spaces instead of tabs
-set shiftwidth=4    " Number of auto-indent spaces
+set shiftwidth=2    " Number of auto-indent spaces
 set smartindent     " Enable smart-indent
 set smarttab        " Enable smart-tabs
-set softtabstop=4   " Number of spaces per Tab
+set softtabstop=2   " Number of spaces per Tab
 
 "" Advanced
 " Window
@@ -96,8 +92,6 @@ set showtabline=2   " Show tab bar
 set autochdir                   " Change working directory to open buffer
 set path+=**                    " Find recursive files
 set backup                      " Activate Backup of old files
-set backupdir=~/.vim/.backup    " set backup dir
-set directory=~/.vim/.swp       " set swap dir -> no annoying swp files in repos
 
 " Miscellaneous
 set undolevels=1000 " Number of undo levels
@@ -120,8 +114,6 @@ nnoremap <leader>, <C-]>
 """"""""""""""""""""
 "Tagbar 
 nmap <leader>8 :TagbarToggle<CR>
-
-
 
 " Own Scripts
 """""""""""""

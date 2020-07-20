@@ -1,5 +1,7 @@
 setopt COMPLETE_ALIASES
 
+alias opn="xdg-open"
+alias cpr="rsync -ah --inplace --no-whole-file --info=progress2"
 alias ls='ls --color'
 alias l='ls -tF'     # type, info
 alias la='ls -tFA'   # type, info, all
@@ -24,6 +26,7 @@ alias python='python3'
 alias tb='nc termbin.com 9999'
 
 # docker
+alias dco='docker-compose'
 alias dcl='docker-compose logs -f'
 alias dcu='docker-compose up && docker-compose logs -f'
 alias dcd='docker-compose down'
@@ -33,6 +36,8 @@ alias fpt='pt "" * | fzf'
 #alias fpt='pt "" * | fzf --preview "(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200"'
 
 # Functions
+# simple string-compare
+str_cmp() { if [ "$1" = "$2" ]; then echo 0; else echo 1; fi }
 # fif <searchTerm> - find in files <searchTerm>
 # ---------------------------
 fif() {

@@ -1,80 +1,116 @@
-zplug 'zplug/zplug', hook-build:'zplug --self-manage'
-zplug "bhilburn/powerlevel9k", use:powerlevel9k.zsh-theme
-zplug "zsh-users/zsh-completions"
-zplug "chrissicool/zsh-256color"
+turbo0()   { zinit ice wait"0a" lucid             "${@}"; }
+turbo1()   { zinit ice wait"0b" lucid             "${@}"; }
+turbo2()   { zinit ice wait"0c" lucid             "${@}"; }
+zcommand() { zinit ice wait"0b" lucid as"program" "${@}"; }
+zsnippet() { zinit snippet "${@}"; }
+zcompletion() { zinit ice wait lucid as"completion"; zsnippet "${@}"; }
+zload()    { zinit load                           "${@}"; }
 
-# fzf-plugins
-zplug "junegunn/fzf", \
-    as:command, \
-    use:"bin/fzf-tmux"
-zplug "junegunn/fzf-bin", \
-    from:gh-r, \
-    as:command, \
-    rename-to:"fzf"
+### Fuzzy Finder fzf
 
-# fast and user-friendly find - dont know yet if its good for me
-#zplug "sharkdp/fd", \
-#    from:gh-r, \
-#    as:command, \
-#    use:"*64*linux*", \
-#    hook-build:"ls"
+# Install `fzf` bynary and tmux helper script
+zcommand from"gh-r";         zload junegunn/fzf-bin
+zcommand pick"bin/fzf-tmux"; zload junegunn/fzf
 
-# yubikey uses gpg-agent
-zplug "plugins/gpg-agent", from:oh-my-zsh
+# Create and bind multiple widgets using fzf
+turbo0 multisrc"shell/{completion,key-bindings}.zsh" \
+        id-as"junegunn/fzf_completions" pick"/dev/null"
+zload junegunn/fzf
 
-# don't checkout 32M of docker-repos, use oh-my-zsh plugins instead
-#zplug "docker/compose", depth:1, use:contrib/completion/zsh
-#zplug "docker/cli", depth:1, use:contrib/completion/zsh
-zplug "plugins/docker", from:oh-my-zsh
-zplug "plugins/docker-compose", from:oh-my-zsh
-#zplug "plugins/docker-machine", from:oh-my-zsh
+### movement with "z"
+# the binary
+zcommand make"PREFIX=$ZPFX install"; zload clvv/fasd
+# initialization from oh-my-zsh
+zsnippet OMZ::plugins/fasd
+# integration with fzf
+zload wookayin/fzf-fasd
 
-#aws
-zplug "plugins/aws", from:oh-my-zsh
+### ls - colors
 
-zplug "plugins/gradle", from:oh-my-zsh
-zplug "plugins/extract", from:oh-my-zsh
+zinit ice \
+    atclone"dircolors -b src/dir_colors > dircolors.zsh" \
+    atpull'%atclone' pick"dircolors.zsh" nocompile'!' \
+    atload'zstyle ":completion:*" list-colors “${(s.:.)LS_COLORS}”'
+zload arcticicestudio/nord-dircolors
 
-# Set the priority when loading
-# e.g., zsh-syntax-highlighting must be loaded
-# after executing compinit command and sourcing other plugins
-# (If the defer tag is given 2 or above, run after compinit command)
-zplug "zsh-users/zsh-syntax-highlighting", defer:2
+### plugins
 
-# IDE-like completion from history
-zplug "tarruda/zsh-autosuggestions", use:"zsh-autosuggestions.zsh"
+zsnippet OMZ::plugins/gradle
+zsnippet OMZ::plugins/extract
 
-zplug 'BurntSushi/ripgrep', \
-    from:gh-r, \
-    as:command, \
-    rename-to:"rg"
+### completions
 
-# console-snippet-manager - go need 218MB - dpkg-package is available
-# zplug 'knqyf263/pet', as:command, hook-build:'go get -d && go build'
-#zplug "knqyf263/pet", \
-#    from:gh-r, \
-#    use:"*linux*64*tar*", \
-#    as:plugin
-#zplug "knqyf263/pet", defer:1, \
-#    use:"./pet", \
-#    as:command
-#zplug "knqyf263/pet", defer:2, use:"misc/completions/zsh"
+zcompletion https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
+zcompletion https://raw.githubusercontent.com/docker/compose/master/contrib/completion/zsh/_docker-compose
 
-# lnav logfile viewer
-zplug "tstack/lnav", \
-    from:gh-r, \
-    use:"*linux*64*", \
-    as:command
+zcompletion $ZSH_CONF/additional-completions/_kubectl
+zcompletion $ZSH_CONF/additional-completions/_minikube
+zcompletion https://raw.githubusercontent.com/bonnefoa/kubectl-fzf/master/kubectl_fzf.plugin.zsh
 
-# json for commandline
-# https://stedolan.github.io/jq/
-zplug "stedolan/jq", \
-    from:gh-r, \
-    use:"*linux64*", \
-    as:command
+### Binaries
 
-zplug 'liangguohuan/fzf-marker'
+# direnv
 
-zplug "clvv/fasd", as:command, use:fasd
-zplug "plugins/fasd", from:oh-my-zsh, if:"(( $+commands[fasd] ))", on:"clvv/fasd"
-zplug "wookayin/fzf-fasd"
+zcommand from"gh-r" \
+    mv"direnv* -> direnv" \
+    atclone'./direnv hook zsh > zhook.zsh' \
+    atpull'%atclone' \
+    pick"direnv" \
+    src="zhook.zsh"
+zload direnv/direnv
+
+# git-extras
+zcommand \
+    pick"$ZPFX/bin/git-*" \
+    make"PREFIX=$ZPFX" nocompile \
+    atclone"source etc/git-extras-completion.zsh" \
+    atpull'%atclone'
+zload tj/git-extras
+
+zcommand from"gh-r" pick"*linux*x68*64*"
+zload dotzero/git-profile
+
+# other Binaries
+
+zcommand from"gh-r" mv"ripgrep* -> ripgrep" pick"ripgrep/rg"
+zload BurntSushi/ripgrep
+
+zcommand from"gh-r" pick"*Linux*x86*64*"
+zload jesseduffield/lazydocker
+
+zcommand from"gh-r" pick"*linux64*" cp"jq* -> $ZPFX/bin/jq"
+zload stedolan/jq
+
+zcommand from"gh-r" pick"*darwin*64" cp"*/pt -> $ZPFX/bin/pt"
+zload monochromegane/the_platinum_searcher
+
+### powershell 10k
+
+zinit ice depth=1 atload'!source $ZSH_CONF/theme.zsh' nocd
+zload romkatv/powerlevel10k
+
+### this needed to be at last?
+# order of loading plugins: https://github.com/zdharma/zinit/issues/130
+
+# zsh-users/zsh-completions: delay compinit
+turbo0 blockf atpull'zinit creinstall -q .'; zload zsh-users/zsh-completions 
+
+#zplugin ice blockf \
+#atpull'zplg creinstall zsh-users/zsh-completions'
+#zload zsh-users/zsh-completions
+
+# history-search-multi-word
+turbo1 compile"(hsmw-*|history-*)"; zload zdharma/history-search-multi-word 
+bindkey "^R" history-search-multi-word
+
+turbo0 atinit"zicompinit; zicdreplay"; zload zdharma/fast-syntax-highlighting
+turbo0 atload"_zsh_autosuggest_start"; zload zsh-users/zsh-autosuggestions
+
+# unset temporary functions
+unset -f turbo0
+unset -f turbo1
+unset -f turbo2
+unset -f zcommand
+unset -f zcompletion
+unset -f zload
+unset -f zsnippet
